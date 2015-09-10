@@ -11,10 +11,10 @@ GREEN = "#33CC33"
 
 COLOR = PURPLE
 
-#Read the file to get initial value
+#Set global value
 number = "1"
 
-
+#updates the file by 1 when called
 def count():
     print "Running function"
     counter = open("counter.txt","r")
@@ -24,12 +24,14 @@ def count():
     counter = open("counter.txt","w")
     counter.write(str(number))
     counter.close()
+    #Output result on commandline for debug
     print "count now"
     print str(number)
     return
 
 @app.route('/')
 def hello():
+    #Run the function to set the value number and update
     count()
     return """
     <html>
