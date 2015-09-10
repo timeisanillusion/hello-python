@@ -1,6 +1,7 @@
 import os
 import uuid
 import redis
+import random
 from flask import Flask
 from flask import request
 from flask import jsonify
@@ -43,7 +44,24 @@ def count2():
     r = redis.Redis(host=credentials['hostname'], port=credentials['port'], password=credentials['password'])
     r.incr('HITCOUNT')
     number2 = r.get('HITCOUNT')
+
     return number2
+
+
+def buildquotes():
+    rediscloud_service = json.loads(os.environ['VCAP_SERVICES'])['rediscloud'][0]
+    credentials = rediscloud_service['credentials']
+    r = redis.Redis(host=credentials['hostname'], port=credentials['port'], password=credentials['password'])
+    r.set('q1', "Don't Panic")
+    r.set('q2', "The rest of you keep banging the rocks together")
+    r.set('q3', "Time is an illusion, lunchtime doubly so")
+    r.set('q4', "Just when you think life can not possibly get any worse it suddenly does")
+    r.set('q5', "A common mistake that people make when trying to design something completely foolproof is to underestimate the ingenuity of complete fools")
+    r.set('q6', "The ships hung in the sky in much the same way that bricks does not")
+
+    array1=['q1','q2','q3','q4','q5','q6']
+
+    return str(r.get(random.choice(array1)))
 
 @app.route('/')
 def hello():
@@ -55,6 +73,8 @@ def hello():
     print str(vistorc2)
     print "IP Info"
     print str(ip)
+    quote = buildquotes()
+    print str(quote)
     return """
     <html>
     <body bgcolor="{}">
@@ -68,13 +88,17 @@ def hello():
     <font color="white">Welcome Vistor Number (redis): <br/>{}
     </br>
     <img src="https://cloudintegration.files.wordpress.com/2011/01/dilbert_cloud_computing.jpg">
+    </br>
+    {}
     </center>
+
+
 
     </body>
     </html>
 
 
-    """.format(COLOR,my_uuid,ip,vistorc2)
+    """.format(COLOR,my_uuid,ip,vistorc2,quote)
 
 
 
