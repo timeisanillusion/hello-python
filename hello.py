@@ -25,14 +25,13 @@ def count():
     counter.write(str(number))
     counter.close()
     #Output result on commandline for debug
-    print "count now"
-    print str(number)
-    return
+    return number
 
 @app.route('/')
 def hello():
     #Run the function to set the value number and update
-    count()
+    vistorc = count()
+    print str(vistorc)
     return """
     <html>
     <body bgcolor="{}">
@@ -49,7 +48,7 @@ def hello():
     </html>
 
 
-    """.format(COLOR,my_uuid,number)
+    """.format(COLOR,my_uuid,vistorc)
 
 
 
