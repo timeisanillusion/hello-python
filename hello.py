@@ -1,7 +1,9 @@
 import os
 import uuid
 from flask import Flask
-import cgi
+from flask import request
+from flask import jsonify
+
 
 
 app = Flask(__name__)
@@ -13,6 +15,10 @@ COLOR = PURPLE
 
 #Set global value
 number = "1"
+
+@app.route("/get_my_ip", methods=["GET"])
+def get_my_ip():
+    return str(request.environ['REMOTE_ADDR'])
 
 #updates the file by 1 when called
 def count():
@@ -31,24 +37,33 @@ def count():
 def hello():
     #Run the function to set the value number and update
     vistorc = count()
+    ip = get_my_ip()
+    print "Vistor count"
     print str(vistorc)
+    print "IP Info"
+    print str(ip)
     return """
     <html>
     <body bgcolor="{}">
 
     <center><h1><font color="white">Hi, I'm GUID:<br/>
     {}</br>
+    </br>
 
-    <center><h3><font color="white">Welcome Vistor Number: <br/>
+    <font color="white">Welcome Vistor Number: <br/>
     {}</br>
-
+    </br>
+    <font color="white">Coming from: <br/>{}
+    </br>
+    </br>
+    <img src="https://cloudintegration.files.wordpress.com/2011/01/dilbert_cloud_computing.jpg">
     </center>
 
     </body>
     </html>
 
 
-    """.format(COLOR,my_uuid,vistorc)
+    """.format(COLOR,my_uuid,vistorc,ip)
 
 
 
