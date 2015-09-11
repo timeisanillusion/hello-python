@@ -7,38 +7,15 @@ from flask import request
 from flask import jsonify
 from flask import json
 
-#servicedataexport  = json.dumps(rediscloud)
-
-
 app = Flask(__name__)
 my_uuid = str(uuid.uuid1())
 PURPLE = "#800080"
 GREEN = "#33CC33"
-
 COLOR = PURPLE
-
-#Set global value
-#number = "1"
-#number2 = "1"
-vistorc2 = "1"
-quote = "test1"
 
 @app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
     return str(request.environ['REMOTE_ADDR'])
-
-#updates the file by 1 when called
-#def count():
-#    print "Running function"
-#    counter = open("counter.txt","r")
-#    line = counter.readline()
-#    counter.close()
-#    number = int(line) + 1
-#    counter = open("counter.txt","w")
-#    counter.write(str(number))
-#    counter.close()
-    #Output result on commandline for debug
-#    return number
 
 def count2():
     rediscloud_service = json.loads(os.environ['VCAP_SERVICES'])['rediscloud'][0]
@@ -46,9 +23,7 @@ def count2():
     r = redis.Redis(host=credentials['hostname'], port=credentials['port'], password=credentials['password'])
     r.incr('HITCOUNT')
     number2 = r.get('HITCOUNT')
-
     return number2
-
 
 def buildquotes():
     rediscloud_service = json.loads(os.environ['VCAP_SERVICES'])['rediscloud'][0]
@@ -60,55 +35,44 @@ def buildquotes():
     r.set('q4', "Just when you think life can not possibly get any worse it suddenly does")
     r.set('q5', "A common mistake that people make when trying to design something completely foolproof is to underestimate the ingenuity of complete fools")
     r.set('q6', "The ships hung in the sky in much the same way that bricks does not")
-
     array1=['q1','q2','q3','q4','q5','q6']
-
     return str(r.get(random.choice(array1)))
-
-@app.route('/cloudlink', methods=['POST'])
-def addRegion():
-    print("I got it!")
-    print(request.form['url'])
-    return str(request.form['url'])
 
 @app.route('/')
 def hello():
-    #Run the function to set the value number and update
-    #vistorc = count()
+    #Initial values that will get replaced if on CF
     ip = get_my_ip()
-    vistorc2 = "1"
-    quote = "Welcome my friend, stay a while and listen"
+    vistorc2 = "Unkown"
+    quote = ""
+    #Check for CF environment info
     if os.environ.get('VCAP_SERVICES') != None:
-        print "no vcap"
+        print "CF Environment found"
         vistorc2 = count2()
         quote = buildquotes()
     return """
     <html>
     <body bgcolor="{}">
-
-    <center><h1><font color="white">Hi, I'm GUID:<br/>
-    {}</br>
+    <center>
+    <img src="/static/pic1.png" alt="EMware">
+    <h1><font color="white">Hi, I'm GUID: <br/>{}
     </br>
-    <font color="white">Running from: <br/>
-    {}</br>
     </br>
-    <font color="white">Welcome Vistor Number (redis): <br/>{}
+    Running from: <br/>{}
+    </br>
+    </br>
+    Welcome Vistor Number: <br/>{}
+    </br>
     </br>
     <img src="https://cloudintegration.files.wordpress.com/2011/01/dilbert_cloud_computing.jpg">
     </br>
-    {}
+    </br>
+    "{}"
     </center>
-
-    <form action="cloudlink" method="post">
-        CloudLink URL: <input type="text" name="url"><br>
-        <input type="submit" value="Submit">
-    </form>
 
     </body>
     </html>
 
     """.format(COLOR,my_uuid,ip,vistorc2,quote)
-
 
 
 if __name__ == "__main__":
