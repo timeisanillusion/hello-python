@@ -20,6 +20,8 @@ COLOR = PURPLE
 #Set global value
 #number = "1"
 #number2 = "1"
+vistorc2 = "1"
+quote = "test1"
 
 @app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
@@ -63,18 +65,23 @@ def buildquotes():
 
     return str(r.get(random.choice(array1)))
 
+@app.route('/cloudlink', methods=['POST'])
+def addRegion():
+    print("I got it!")
+    print(request.form['url'])
+    return str(request.form['url'])
+
 @app.route('/')
 def hello():
     #Run the function to set the value number and update
-#    vistorc = count()
-    vistorc2 = count2()
+    #vistorc = count()
     ip = get_my_ip()
-    print "Vistor count"
-    print str(vistorc2)
-    print "IP Info"
-    print str(ip)
-    quote = buildquotes()
-    print str(quote)
+    vistorc2 = "1"
+    quote = "Welcome my friend, stay a while and listen"
+    if os.environ.get('VCAP_SERVICES') != None:
+        print "no vcap"
+        vistorc2 = count2()
+        quote = buildquotes()
     return """
     <html>
     <body bgcolor="{}">
@@ -92,11 +99,13 @@ def hello():
     {}
     </center>
 
-
+    <form action="cloudlink" method="post">
+        CloudLink URL: <input type="text" name="url"><br>
+        <input type="submit" value="Submit">
+    </form>
 
     </body>
     </html>
-
 
     """.format(COLOR,my_uuid,ip,vistorc2,quote)
 
