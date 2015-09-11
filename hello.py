@@ -9,14 +9,17 @@ from flask import json
 
 app = Flask(__name__)
 my_uuid = str(uuid.uuid1())
+#Useful coloUrs
 PURPLE = "#800080"
 GREEN = "#33CC33"
 COLOR = PURPLE
 
+#Function to get the local IP address
 @app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
     return str(request.environ['REMOTE_ADDR'])
 
+#Return and increment the redis page hitcounter
 def count2():
     rediscloud_service = json.loads(os.environ['VCAP_SERVICES'])['rediscloud'][0]
     credentials = rediscloud_service['credentials']
@@ -25,6 +28,7 @@ def count2():
     number2 = r.get('HITCOUNT')
     return number2
 
+#Returns a random quote
 def buildquotes():
     rediscloud_service = json.loads(os.environ['VCAP_SERVICES'])['rediscloud'][0]
     credentials = rediscloud_service['credentials']
@@ -42,9 +46,12 @@ def buildquotes():
 def hello():
     #Initial values that will get replaced if on CF
     ip = get_my_ip()
-    vistorc2 = "Unkown"
+    vistorc2 = "Unkown (Running local)"
     quote = ""
-    #Check for CF environment info
+    #Check if we running locally and change string :)
+    if str(ip) == "127.0.0.1":
+        ip = "There is no place like 127.0.0.1"
+    #Check for CF environment info before running functions that need it
     if os.environ.get('VCAP_SERVICES') != None:
         print "CF Environment found"
         vistorc2 = count2()
