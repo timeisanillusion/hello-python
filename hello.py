@@ -6,6 +6,8 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 from flask import json
+import newrelic.agent
+newrelic.agent.initialize()
 
 app = Flask(__name__)
 my_uuid = str(uuid.uuid1())
@@ -15,12 +17,13 @@ GREEN = "#33CC33"
 COLOR = PURPLE
 
 #Function to get the local IP address
-@app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
+    print "Getting local IP"
     return str(request.environ['REMOTE_ADDR'])
 
 #Return and increment the redis page hitcounter
 def count2():
+    print "Increasing Count"
     rediscloud_service = json.loads(os.environ['VCAP_SERVICES'])['rediscloud'][0]
     credentials = rediscloud_service['credentials']
     r = redis.Redis(host=credentials['hostname'], port=credentials['port'], password=credentials['password'])
@@ -30,6 +33,8 @@ def count2():
 
 #Returns a random quote
 def buildquotes():
+    print "Generating Quote"
+    #redis may not be the best choise for this but reasons
     rediscloud_service = json.loads(os.environ['VCAP_SERVICES'])['rediscloud'][0]
     credentials = rediscloud_service['credentials']
     r = redis.Redis(host=credentials['hostname'], port=credentials['port'], password=credentials['password'])
@@ -44,18 +49,19 @@ def buildquotes():
 
 @app.route('/')
 def hello():
-    #Initial values that will get replaced if on CF
+    #Initial values that will get replaced if on CF, otherwise will not show in HTML
     ip = get_my_ip()
-    vistorc2 = "Unkown (Running local)"
+    vistorc2 = ""
     quote = ""
     #Check if we running locally and change string :)
     if str(ip) == "127.0.0.1":
+        print "Local environment found"
         ip = "There is no place like 127.0.0.1"
     #Check for CF environment info before running functions that need it
     if os.environ.get('VCAP_SERVICES') != None:
-        print "CF Environment found"
-        vistorc2 = count2()
-        quote = buildquotes()
+        print "CF environment found"
+        vistorc2 = "Welcome Vistor Number: " + str(count2())
+        quote = "'" + buildquotes() + "'"
     return """
     <html>
     <body bgcolor="{}">
@@ -67,13 +73,13 @@ def hello():
     Running from: <br/>{}
     </br>
     </br>
-    Welcome Vistor Number: <br/>{}
+    <br/>{}
     </br>
     </br>
     <img src="https://cloudintegration.files.wordpress.com/2011/01/dilbert_cloud_computing.jpg">
     </br>
     </br>
-    "{}"
+    {}
     </center>
 
     </body>
@@ -83,4 +89,4 @@ def hello():
 
 
 if __name__ == "__main__":
-	app.run(debug=True,host='0.0.0.0', port=int(os.getenv('VCAP_APP_PORT', '5000')))
+	app.run(debug=False,host='0.0.0.0', port=int(os.getenv('VCAP_APP_PORT', '5000')))
